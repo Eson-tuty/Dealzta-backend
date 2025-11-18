@@ -1,0 +1,52 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\InterestController;
+use App\Http\Controllers\Api\ImageController;
+
+Route::prefix('v1')->group(function () {
+
+    Route::prefix('auth')->group(function () {
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+        Route::post('/check-contact', [AuthController::class, 'checkContact']);
+
+        Route::post('/send-otp', [AuthController::class, 'sendOtp']);
+        Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+        Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+
+         // ✅ ADD THESE NEW ROUTES FOR PASSWORD RESET
+        Route::post('/forgot-password/check-account', [AuthController::class, 'checkAccountForReset']);
+        Route::post('/forgot-password/send-otp', [AuthController::class, 'sendPasswordResetOtp']);
+        Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyPasswordResetOtp']);
+        Route::post('/forgot-password/reset', [AuthController::class, 'resetPassword']);
+
+        Route::get('/interests', [InterestController::class, 'index']);
+    });
+
+    Route::middleware('auth:api')->group(function () {
+        Route::prefix('auth')->group(function () {
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::get('/me', [AuthController::class, 'me']);
+            Route::get('/profile', [AuthController::class, 'userProfile']);
+        });
+    });
+    Route::post('/check-username', [AuthController::class, 'checkUsername']); // ✅ NEW ROUTE
+
+    Route::post('/upload-profile-image', [ImageController::class, 'uploadProfileImage']);
+    Route::prefix('auth')->group(function () {
+        Route::post('/profile/update', [AuthController::class, 'updateProfile']);
+    });
+});
+
+
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'OK',
+        'message' => 'Dealzta API is running',
+        'timestamp' => now()->toISOString(),
+    ]);
+});
