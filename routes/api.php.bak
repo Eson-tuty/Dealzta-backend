@@ -1,0 +1,125 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\InterestController;
+use App\Http\Controllers\Api\ImageController;
+use App\Http\Controllers\Api\BusinessVerificationController;
+use App\Http\Controllers\Api\PostController;
+
+Route::prefix('v1')->group(function () {
+
+    // Public categories
+    Route::get('/categories', [InterestController::class, 'index']);
+
+    // -----------------------------
+    // AUTH (public)
+    // -----------------------------
+    Route::prefix('auth')->group(function () {
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+        Route::post('/check-contact', [AuthController::class, 'checkContact']);
+
+        Route::post('/send-otp', [AuthController::class, 'sendOtp']);
+        Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+        Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+
+        Route::get('/interests', [InterestController::class, 'index']);
+    });
+
+    // -----------------------------
+    // AUTHENTICATED ROUTES
+    // -----------------------------
+    // Route::middleware('auth:api')->group(function () {
+
+    //     // AUTH PROFILE ROUTES
+    //     Route::prefix('auth')->group(function () {
+    //         Route::post('/logout', [AuthController::class, 'logout']);
+    //         Route::get('/me', [AuthController::class, 'me']);
+    //         Route::get('/profile', [AuthController::class, 'userProfile']);
+    //         Route::post('/profile/update', [AuthController::class, 'updateProfile']);
+    //     });
+
+    //     // -----------------------------
+    //     // BUSINESS VERIFICATION ROUTES
+    //     // -----------------------------
+    //     Route::prefix('business-verification')->group(function () {
+    //         Route::post('/step/{step}', [BusinessVerificationController::class, 'saveStep']);
+    //         Route::get('/cache', [BusinessVerificationController::class, 'getCache']);
+    //         Route::post('/submit', [BusinessVerificationController::class, 'submit']);
+    //         Route::delete('/cache', [BusinessVerificationController::class, 'clearCache']);
+    //         Route::post('/upload', [BusinessVerificationController::class, 'uploadDocument']);
+
+    //         Route::get('/profile', [BusinessVerificationController::class, 'getBusinessProfile']);
+    //         Route::get('/my-businesses', [BusinessVerificationController::class, 'myBusinesses']);
+    //         Route::get('/profile/{id}', [BusinessVerificationController::class, 'getProfile']);
+
+    //         Route::put('/{id}/description', [BusinessVerificationController::class, 'updateDescription']);
+    //         Route::put('/{id}/bank-details', [BusinessVerificationController::class, 'updateBankDetails']);
+    //     });
+
+    //     // -----------------------------
+    //     // POSTS (PROTECTED)
+    //     // -----------------------------
+    //     Route::get('/posts', [PostController::class, 'index']);
+    //     Route::post('/posts', [PostController::class, 'store']);
+    //     Route::put('/posts/{id}', [PostController::class, 'update']);
+    //     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+    //     Route::post('/posts/{id}/increment-views', [PostController::class, 'incrementViews']);
+    // });
+
+// 'jwt.verify'
+        Route::middleware('jwt.verify')->group(function () {
+
+        // AUTH PROFILE ROUTES
+        Route::prefix('auth')->group(function () {
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::get('/me', [AuthController::class, 'me']);
+            Route::get('/profile', [AuthController::class, 'userProfile']);
+            Route::post('/profile/update', [AuthController::class, 'updateProfile']);
+        });
+
+        // -----------------------------
+        // BUSINESS VERIFICATION ROUTES
+        // -----------------------------
+        Route::prefix('business-verification')->group(function () {
+            Route::post('/step/{step}', [BusinessVerificationController::class, 'saveStep']);
+            Route::get('/cache', [BusinessVerificationController::class, 'getCache']);
+            Route::post('/submit', [BusinessVerificationController::class, 'submit']);
+            Route::delete('/cache', [BusinessVerificationController::class, 'clearCache']);
+            Route::post('/upload', [BusinessVerificationController::class, 'uploadDocument']);
+
+            Route::get('/profile', [BusinessVerificationController::class, 'getBusinessProfile']);
+            Route::get('/my-businesses', [BusinessVerificationController::class, 'myBusinesses']);
+            Route::get('/profile/{id}', [BusinessVerificationController::class, 'getProfile']);
+
+            Route::put('/{id}/description', [BusinessVerificationController::class, 'updateDescription']);
+            Route::put('/{id}/bank-details', [BusinessVerificationController::class, 'updateBankDetails']);
+        });
+
+        // -----------------------------
+        // POSTS (PROTECTED)
+        // -----------------------------
+        Route::get('/posts', [PostController::class, 'index']);
+        Route::post('/posts', [PostController::class, 'store']);
+        Route::put('/posts/{id}', [PostController::class, 'update']);
+        Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+        Route::post('/posts/{id}/increment-views', [PostController::class, 'incrementViews']);
+    });
+
+    // PUBLIC ROUTES
+    Route::post('/check-username', [AuthController::class, 'checkUsername']);
+    Route::post('/upload-profile-image', [ImageController::class, 'uploadProfileImage']);
+});
+
+// Health check
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'OK',
+        'message' => 'Dealzta API is running',
+        'timestamp' => now()->toISOString(),
+    ]);
+});
